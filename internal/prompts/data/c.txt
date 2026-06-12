@@ -1,0 +1,8 @@
+int main(void) {\n    int total = 0;\n    return total;\n}
+void print_ready(void) {\n    printf("ready\\n");\n}
+for (size_t i = 0; i < count; i++) {\n    total += values[i];\n}
+char buffer[128] = {0};\n    buffer[0] = '\\0';
+if (fgets(buffer, sizeof buffer, stdin) != NULL) {\n    puts(buffer);\n}
+int status = EXIT_SUCCESS;\n    return status;
+int clamp(int value, int low, int high) {\n    if (value < low) return low;\n    if (value > high) return high;\n    return value;\n}
+void reset(Point *point) {\n    point->x = 0;\n    point->y = 0;\n}

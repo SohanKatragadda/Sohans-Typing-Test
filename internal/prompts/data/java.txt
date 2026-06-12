@@ -1,0 +1,8 @@
+public int clamp(int value, int low, int high) {\n    return Math.max(low, Math.min(value, high));\n}
+public boolean isReady(User user) {\n    return user != null && user.isActive() && !user.isLocked();\n}
+public String joinNames(List<User> users) {\n    return users.stream().map(User::name).collect(Collectors.joining(", "));\n}
+public void writeLog(Path path, String message) throws IOException {\n    Files.writeString(path, message + System.lineSeparator());\n}
+public Optional<User> findUser(List<User> users, String id) {\n    return users.stream().filter(user -> user.id().equals(id)).findFirst();\n}
+public int sum(int[] values) {\n    int total = 0;\n    for (int value : values) {\n        total += value;\n    }\n    return total;\n}
+public String initials(String first, String last) {\n    return first.substring(0, 1) + last.substring(0, 1);\n}
+public void markComplete(Task task) {\n    task.setComplete(true);\n    task.setUpdatedAt(Instant.now());\n}

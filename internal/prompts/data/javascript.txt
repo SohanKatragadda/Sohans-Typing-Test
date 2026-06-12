@@ -1,0 +1,8 @@
+function totalPrices(prices) {\n    return prices.reduce((sum, price) => sum + price, 0);\n}
+if (saved) {\n    console.log("saved");\n}
+async function getUser(id) {\n    const user = await loadUser(id);\n    return user;\n}
+const names = items\n    .filter(item => item.active)\n    .map(item => item.name);
+button.addEventListener("click", () => {\n    saveDraft();\n});
+if (state.loaded && !state.saving) {\n    render(state);\n}
+function groupByType(items) {\n    return items.reduce((groups, item) => {\n        groups[item.type] = groups[item.type] || [];\n        groups[item.type].push(item);\n        return groups;\n    }, {});\n}
+const message = errors.length > 0\n    ? errors.join(", ")\n    : "ready";

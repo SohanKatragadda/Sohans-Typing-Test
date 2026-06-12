@@ -1,0 +1,8 @@
+def normalize_scores(scores):\n    total = sum(scores)\n    if total == 0:\n        return []\n    return [score / total for score in scores]
+def read_lines(path):\n    with open(path, "r", encoding="utf-8") as file:\n        return [line.strip() for line in file]
+def clamp(value, low, high):\n    return max(low, min(value, high))
+def count_words(text):\n    counts = {}\n    for word in text.split():\n        counts[word] = counts.get(word, 0) + 1\n    return counts
+def first_even(numbers):\n    for number in numbers:\n        if number % 2 == 0:\n            return number\n    return None
+def format_user(user):\n    name = user.get("name", "unknown")\n    role = user.get("role", "guest")\n    return f"{name} ({role})"
+def chunk(items, size):\n    for index in range(0, len(items), size):\n        yield items[index:index + size]
+def safe_int(value, default=0):\n    try:\n        return int(value)\n    except ValueError:\n        return default

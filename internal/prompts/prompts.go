@@ -1,7 +1,9 @@
 package prompts
 
 import (
+	"embed"
 	"math/rand"
+	"strconv"
 	"strings"
 )
 
@@ -17,46 +19,115 @@ const (
 
 var Languages = []Language{English, Python, Java, C, JavaScript}
 
-var pool = map[Language][]string{
-	English: {
-		"calm focus turns a small practice session into a reliable habit that follows you through the rest of the day.",
-		"typing rewards patience because each clean word gives your hands a better map of the next one.",
-		"minimal tools are often the sharpest when they remove every distraction from the work in front of you.",
-	},
-	Python: {
-		"def normalize_scores(scores):\n    total = sum(scores)\n    return [score / total for score in scores if total > 0]",
-		"from pathlib import Path\n\nfor path in Path(\".\").glob(\"*.txt\"):\n    print(path.name, path.stat().st_size)",
-		"class Timer:\n    def __init__(self, seconds):\n        self.seconds = seconds\n        self.remaining = seconds",
-	},
-	Java: {
-		"public class Counter {\n    private int value;\n    public void increment() {\n        value++;\n    }\n}",
-		"List<String> names = users.stream()\n    .map(User::name)\n    .filter(name -> !name.isBlank())\n    .toList();",
-		"try {\n    Files.writeString(path, content);\n} catch (IOException error) {\n    logger.error(error.getMessage());\n}",
-	},
-	C: {
-		"#include <stdio.h>\n\nint main(void) {\n    printf(\"ready\\n\");\n    return 0;\n}",
-		"for (size_t i = 0; i < count; i++) {\n    total += values[i];\n}\nprintf(\"%zu\\n\", total);",
-		"char buffer[128];\nif (fgets(buffer, sizeof buffer, stdin) != NULL) {\n    puts(buffer);\n}",
-	},
-	JavaScript: {
-		"const totals = orders\n  .filter(order => order.paid)\n  .map(order => order.amount)\n  .reduce((sum, amount) => sum + amount, 0);",
-		"async function loadUser(id) {\n  const response = await fetch(`/api/users/${id}`);\n  return response.json();\n}",
-		"const button = document.querySelector(\"button\");\nbutton.addEventListener(\"click\", () => {\n  console.log(\"saved\");\n});",
-	},
+//go:embed data/*.txt
+var promptFiles embed.FS
+
+var promptFileByLanguage = map[Language]string{
+	English:    "data/english.txt",
+	Python:     "data/python.txt",
+	Java:       "data/java.txt",
+	C:          "data/c.txt",
+	JavaScript: "data/javascript.txt",
 }
 
-func Random(language Language, minRunes int) string {
+var pool = loadPools()
+
+func Generate(language Language, durationSeconds int) []string {
+	return More(language, initialCount(durationSeconds))
+}
+
+func More(language Language, count int) []string {
+	return MoreExcluding(language, count, nil)
+}
+
+func MoreExcluding(language Language, count int, exclude []string) []string {
 	options := pool[language]
 	if len(options) == 0 {
 		options = pool[English]
 	}
-
-	var builder strings.Builder
-	for builder.Len() < minRunes {
-		if builder.Len() > 0 {
-			builder.WriteString("\n\n")
-		}
-		builder.WriteString(options[rand.Intn(len(options))])
+	if count < 1 {
+		count = 1
 	}
-	return builder.String()
+
+	excluded := make(map[string]bool, len(exclude))
+	for _, prompt := range exclude {
+		excluded[prompt] = true
+	}
+
+	available := make([]string, 0, len(options))
+	for _, option := range options {
+		if !excluded[option] {
+			available = append(available, option)
+		}
+	}
+	if len(available) == 0 {
+		available = append(available, options...)
+	}
+
+	rand.Shuffle(len(available), func(i, j int) {
+		available[i], available[j] = available[j], available[i]
+	})
+
+	segments := make([]string, 0, count)
+	for len(segments) < count {
+		for _, option := range available {
+			segments = append(segments, option)
+			if len(segments) == count {
+				break
+			}
+		}
+		if len(segments) < count {
+			available = append([]string(nil), options...)
+			rand.Shuffle(len(available), func(i, j int) {
+				available[i], available[j] = available[j], available[i]
+			})
+		}
+	}
+	return segments
+}
+
+func loadPools() map[Language][]string {
+	pools := make(map[Language][]string, len(promptFileByLanguage))
+	for language, path := range promptFileByLanguage {
+		content, err := promptFiles.ReadFile(path)
+		if err != nil {
+			continue
+		}
+		pools[language] = parsePromptLines(string(content))
+	}
+	return pools
+}
+
+func parsePromptLines(content string) []string {
+	lines := strings.Split(content, "\n")
+	prompts := make([]string, 0, len(lines))
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		prompts = append(prompts, decodePromptLine(line))
+	}
+	return prompts
+}
+
+func decodePromptLine(line string) string {
+	decoded, err := strconv.Unquote(`"` + strings.ReplaceAll(line, `"`, `\"`) + `"`)
+	if err != nil {
+		return line
+	}
+	return decoded
+}
+
+func initialCount(durationSeconds int) int {
+	switch {
+	case durationSeconds <= 15:
+		return 8
+	case durationSeconds <= 30:
+		return 14
+	case durationSeconds <= 60:
+		return 24
+	default:
+		return 44
+	}
 }
