@@ -1,4 +1,4 @@
-# Typing Test TUI
+# Sohan's Typing Test TUI
 
 A minimal Monkeytype-inspired terminal typing test built with Go, Bubble Tea,
 Bubbles, and Lip Gloss.
