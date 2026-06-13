@@ -3,6 +3,8 @@
 A minimal Monkeytype-inspired terminal typing test built with Go, Bubble Tea,
 Bubbles, and Lip Gloss.
 
+![Sohan's Typing Test demo](screenshots/sohans-typing-test.gif)
+
 ## Run
 
 ```sh
